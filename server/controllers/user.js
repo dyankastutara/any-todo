@@ -4,12 +4,43 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 module.exports = {
+	signinFacebook : (req, res)=>{
+		User.findOne({
+      email : req.body.email
+    })
+    .then((query)=>{
+      if(query){
+				var token = jwt.sign({
+					id : query._id,
+					name : query.name,
+					email : query.email,
+				}, process.env.JWT_SECRET, {expiresIn : '1h'})
+				res.send({
+					token : token
+				})
+      }else{
+      	User.create({
+      		name : req.body.name,
+      		email : req.body.email
+      	})
+      	.then((result)=>{
+      		var token = jwt.sign({
+						id : result._id,
+						name : result.name,
+						email : result.email
+					}, process.env.JWT_SECRET, {expiresIn : '1h'})
+					res.send({
+						token : token
+					})
+      	})
+      }
+    })
+	},
 	signup : (req, res)=>{
 		User.findOne({
 			email : req.body.email
 		})
 		.then(query=>{
-			console.log(query)
 			if(!query){
 				var insertUser = User({
 					name : req.body.name,
@@ -19,7 +50,10 @@ module.exports = {
 
 				insertUser.save((error, response)=>{
 					if(!error){
-						res.send(response)						
+						res.send({
+							response : response,
+							msg : 'You success register, please sign in !'
+						})						
 					}else{
 						res.send(error)
 					}
@@ -28,8 +62,8 @@ module.exports = {
 				res.send({msg : 'This email is already registered'})
 			}
 		})
-		.catch(error=>{
-			res.send(error)
+		.catch(err=>{
+			res.send(err)
 		})
 	},
 	signin : (req, res)=>{
@@ -53,6 +87,15 @@ module.exports = {
 		.catch(err=>{
 			res.send(err)
 		})
+	},
+	validation: (req, res)=>{
+		jwt.verify(req.headers.token, process.env.JWT_SECRET, (err, decoded) => {
+      if(decoded == undefined){
+        res.send(err)
+      }else{
+      	res.send(decoded)
+       }
+	  })
 	},
 	getDetail : (req, res)=>{
 		User.findById(req.params.id)

@@ -17,7 +17,7 @@ module.exports = {
 		var insert = new Todo({
 			task : req.body.task,
 			isCompleted : false,
-			user : req.decoded._id
+			user : req.decoded.id
 		})
 
 		insert.save((err, result)=>{
@@ -33,7 +33,7 @@ module.exports = {
 			if(err){
 				res.send(err)
 			}else{
-				Todo.updateOne({
+				result.update({
 					task : result.task,
 					isCompleted : true,
 					user : req.decoded.id
@@ -55,7 +55,7 @@ module.exports = {
 		.then((result)=>{
 			res.send({
 				result : result,
-				msg : `You delete the data with id ${req.params.id}`
+				msg : `You success delete this task`
 			})
 		})
 		.catch(err=>{

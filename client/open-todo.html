@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Any Todo | Change your world</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<!--   <link rel="stylesheet" type="text/css" href="./assets/semantic-ui/semantic.min.css">
+	<script type="text/javascript" src="./assets/semantic-ui/semantic.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
+	<style type="text/css">
+		.ui.top.fixed.blue.menu{
+			height: 50px; 
+			background-color: #2185D0;
+			padding-top: 8px;
+		}
+		.ui.left.fixed.vertical.menu{
+			margin-top: 50px; 
+			width: 20rem;
+		}
+		.fluid.ui.facebook.button{
+			background: #3b5998;
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color: #fff;
+			font-size: 16px;
+			border-radius: 0em;
+			height: 45px;
+		}
+		.fluid.ui.blue.button{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			font-size: 16px;
+			border-radius: 0em;
+			height: 45px;
+		}
+		.sidebar-title{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color : #0da5f3;
+			font-size : 26px;
+		}
+		a.signin{
+			color: #727272;
+			text-align: center;
+		}
+		a.signin:hover{
+			color: #000000;
+		}
+		.ui.fluid.icon.input{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color: #fff;
+			font-size: 16px;
+			border-radius: 0em;
+			height: 45px;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<nav style="color : #ffffff;">
+			<div class="ui top fixed blue menu">
+				<div class="item" >
+			    <a href="#" style="color: #ffffff; font-weight: bold;">ANY TODO</a>
+			  </div>
+			  <div class="right menu">
+			    <div class="item">
+			      <div class="ui transparent icon input">
+			        <input type="text" placeholder="Search Task ..." id="search-task" onkeyup="myFunction()" style="color: #ffffff;">
+			        <i class="search link icon" style="color: #ffffff;"></i>
+			      </div>
+			    </div>
+			    <a class="item" v-on:click="signout" style="color: #ffffff;">Logout</a>
+			  </div>
+			</div>
+		</nav>
+		<content>
+			<div class="ui left fixed vertical menu">
+			  <div class="item">
+			  </div>
+			  <div class="item">
+			    <p>{{name}}</p>
+			  </div>
+			  <div class="item">
+			    <p>{{email}}</p>
+			  </div>
+			</div>
+			<div class="ui fixed container segment" style="margin-left: 20rem; padding-top: 100px; padding-left: 20px;">
+			  <h1 class="ui header">HI {{name}}</h1> 	
+			  <div class="ui positive message" v-if="msgStatus == true" style="border-radius: 0em;">
+						  <i class="close icon" v-on:click="closeMessage"></i>
+						  <div class="header">{{message}}</div>
+						</div>
+				<table class="ui two column table" style="border-radius: 0em; ">
+				  <tbody>
+				    <tr style="height: 50px;">
+				      <td colspan="2" style="text-align: center"><button id="add-task" class="fluid ui blue basic button" style=" border-radius: 0em; height: 40px;"><i class="plus icon"></i></button></td>
+				    </tr>
+				  </tbody>
+				</table>
+				<table class="ui two column table" style="border-radius: 0em; " id="table-task">
+				  <tbody>
+				    <tr style="height: 50px;" v-for="list in lists" id="tr-task">
+				      <td style="width: 90%; " v-if="list.isCompleted == false" id="td-task">
+				      	<p id="task" style="text-decoration: none;" >{{list.task}}</p>
+				      </td>
+				      <td style="width: 90%; " v-else id="td-task">
+				      	<p id="task" style="text-decoration: line-through;" >{{list.task}}</p>
+				      </td>
+				      <td style="width: 10%;" id="td-task">
+				     		<div class="ui small basic icon buttons" v-if="list.isCompleted == false">
+								  <button class="ui blue basic button" id="checklist" v-on:click="updateChecklist(list._id)">
+								  	<i class="checkmark icon"></i>
+								  </button>
+								  <div class="ui custom popup top right transition hidden checklist">Checklist</div>
+								</div>
+								<div class="ui small basic icon buttons" v-else>
+								  <button class="ui red basic button" id="delete" v-on:click="deleteTask(list._id)">
+								  	<i class="trash outline icon"></i>
+								  </button>  
+								  <div class="ui custom popup top right transition hidden delete">Delete</div>
+								</div>
+				      </td>
+				    </tr>
+				  </tbody>
+				</table>
+			</div>
+		</content>
+
+	<div class="ui modal small add">
+	  <i class="close icon"></i>
+	  <div class="header">
+	    Add task
+	  </div>
+	  <div class="content">
+		  <div class="ui fluid action input">
+		    <input class="ui input fluid" type="text" placeholder="Task" style="border-radius: 0px; height: 45px; font-size: 20px;" v-model="task">
+		  </div>
+	    <div class="ui fluid input" style="padding-top: 10px;">
+	    	<button class="ui primary button fluid" style="border-radius: 0px;" v-on:click="addTask">Add </button>
+	    </div>
+	  </div>
+	</div>
+	</div>
+<script>
+function myFunction() {
+  var input, filter, table, tr, td, i;
+  input = document.getElementById("search-task");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("table-task");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }       
+  }
+}
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#add-task').click(function(){
+    $('.small.ui.modal.add')  
+    .modal({
+    blurring: true
+  })
+      .modal('show');
+  })  
+
+  $('#delete-task').click(function(){
+	  $('.small.ui.modal.add')
+	    .modal('show');
+  })
+
+  $('#checklist')
+  .popup({
+    popup : $('.custom.popup.checklist'),
+    on    : 'hover'
+  })
+
+   $('#delete')
+  .popup({
+    popup : $('.custom.popup.delete'),
+    on    : 'hover'
+  })
+;
+})
+</script>
+
+<script>
+		var app = new Vue({
+		  el: '#app',
+		  data: {
+		    name : '',
+		    email : '',
+		    password : '',
+		    msgStatus:false,
+		    message : '',
+		    task : '',
+		    lists : []
+		  },
+		  methods:{
+		  	signout : function(){
+		  		localStorage.clear()
+		  		location.reload()
+		  	},
+		  	addTask : function(){
+		  		var self=this
+		  		axios.post('http://localhost:3000/api/todos/',{
+			  			task : self.task
+		  		},{
+		  				headers : {
+		  					token : localStorage.getItem('token')
+		  			}
+		  		})
+		  		.then(response=>{
+		  			self.lists.push(response.data)
+		  			self.task = ''
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	updateChecklist : function(id){
+		  		var self = this
+        	var index = self.lists.findIndex(lists=>lists._id == id)
+        	self.lists[index].isCompleted = true
+
+		  		axios.patch(`http://localhost:3000/api/todos/${id}`,{},{
+		  			headers : {
+		  				token : localStorage.getItem('token')
+		  			}
+		  		})
+		  		.then(response=>{
+		  			self.message = response.data.msg
+		  			self.msgStatus = true
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	deleteTask : function(id){
+		  		var self = this
+	  		  var index = this.lists.findIndex(lists=>lists._id == id)
+          self.lists.splice(index,1)
+
+		  		axios.delete(`http://localhost:3000/api/todos/${id}`,{
+		  			headers : {
+		  				token : localStorage.getItem('token')
+		  			}
+		  		})
+		  		.then(response=>{
+		  			self.msgStatus = true
+		  			self.message = response.data.msg
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	closeMessage : function(){
+		  		this.msgStatus = false
+		  	},
+		  	getAll : function(){
+		  		var self = this
+		  		axios.get('http://localhost:3000/api/todos/',{
+		  			headers : {
+		  				token : localStorage.getItem('token')
+		  			}
+		  		})
+		  		.then(response=>{
+		  			console.log(response)
+		  			self.lists = response.data
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	validation : function(){
+		  		var self = this
+		  		axios.get('http://localhost:3000/api/users/validation',{
+		  			headers : {token : localStorage.getItem('token')}
+		  		})
+		  		.then(response=>{
+		  			if(response.data.message){
+		  				localStorage.clear()
+		  				window.location.href = "./login.html"
+		  			}else{
+		  				self.name = response.data.name.toUpperCase()
+			  			self.email = response.data.email.toUpperCase()
+		  			}
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	}
+		  },
+		  created(){
+		  	this.getAll()
+		  	this.validation()
+		  }
+		})
+	</script>
+
+</body>
+</html>

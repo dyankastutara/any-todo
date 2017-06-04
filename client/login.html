@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Any Todo | Change your world</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<style type="text/css">
+		.ui.top.fixed.blue.menu{
+			height: 50px; 
+			background-color: #2185D0;
+			padding-top: 8px;
+		}
+		.ui.left.fixed.vertical.menu{
+			margin-top: 50px; 
+			width: 20rem;
+		}
+		.fluid.ui.facebook.button{
+			background: #3b5998;
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color: #fff;
+			font-size: 16px;
+			border-radius: 0em;
+			height: 45px;
+		}
+		.fluid.ui.blue.button{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			font-size: 16px;
+			border-radius: 0em;
+			height: 45px;
+		}
+		.sidebar-title{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color : #0da5f3;
+			font-size : 26px;
+		}
+		a.signin{
+			color: #727272;
+			text-align: center;
+		}
+		a.signin:hover{
+			color: #000000;
+		}
+		.ui.fluid.icon.input{
+			font-family: Arial,'Helvetica Neue',Helvetica,sans-serif;
+			color: #fff;
+			font-size: 16px;
+			border-radius: 0em;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<nav>
+			<div class="ui top fixed blue menu">
+				<div class="item" >
+			    <a href="#" style="color: #ffffff; font-weight: bold;">ANY TODO</a>
+			  </div>
+			</div>
+		</nav>
+		<content>
+			<div class="ui left fixed vertical menu">
+			  <div class="item">
+			    <h3 class="sidebar-title">Join Free</h3>
+			    <p>Change your world now....</p>
+			  </div>
+			  <div class="item">
+			    <button class="fluid ui facebook button" onclick="checkLoginState()">Facebook</button>
+			  </div>
+			  <div class="item">
+			    <button class="fluid ui blue button" id="signup">SIGN UP</button>
+			  </div>
+			  <div class="item">
+			  	<a href="#" class="signin" id="signin">IM ALREADY HAS A MEMBER?</a>
+			  </div>
+			</div>
+
+			<div class="ui left fixed vertical menu" id="left-sidebar-signin">
+			  <div class="item">
+			    <h3 class="sidebar-title"><a href="#" id="home-signin"><i class="arrow left icon" style="font-size:26px;"></i></a>  Sign In </h3>
+			  </div>
+				<!-- <form class="ui form"> -->
+				  <div class="item">
+				  	<div class="ui fluid icon input">
+						  <input type="text" placeholder="Email" style="border-radius: 0px; height: 45px;" v-model="email">
+						</div>
+				  </div>
+				  <div class="item">
+				  	<div class="ui fluid icon input">
+						  <input type="password" placeholder="Password" style="border-radius: 0px; height: 45px;" v-model="password">
+						</div>
+				  </div>
+				  <div class="item">
+				    <button class="fluid ui blue button" v-on:click="signin">SIGN IN</button>
+				  </div>
+				  <div class="item">
+				    <button class="fluid ui facebook button" onclick="checkLoginState()"><i class="facebook f icon" style="color: #ffffff;"></i>Sign in with Facebook</button>
+				  </div>
+			  <!-- </form> -->
+			</div>
+
+			<div class="ui left fixed vertical menu" id="left-sidebar-signup">
+			  <div class="item">
+			    <h3 class="sidebar-title"><a href="#" id="home-signup"><i class="arrow left icon" style="font-size:26px;"></i></a>  Sign Up </h3>
+			  </div>
+				<!-- <form class="ui form"> -->
+				  <div class="item">
+				  	<div class="ui fluid icon input field">
+						  <input type="text" placeholder="Name" style="border-radius: 0px; height: 45px;" v-model="name">
+						</div>
+				  </div>
+				  <div class="item">
+				  	<div class="ui fluid icon input">
+						  <input type="text" placeholder="Email" style="border-radius: 0px; height: 45px;" v-model="email">
+						</div>
+				  </div>
+				  <div class="item">
+				  	<div class="ui fluid icon input">
+						  <input type="password" placeholder="Password" style="border-radius: 0px; height: 45px;" v-model="password">
+						</div>
+				  </div>
+				  <div class="item">
+				    <button class="fluid ui blue button" v-on:click="signup">SIGN UP</button>
+						<div class="ui positive message" v-if="msgStatus == true" style="border-radius: 0em;">
+						  <i class="close icon" v-on:click="closeMessage"></i>
+						  <div class="header">Message</div>
+						  <p>{{message}}</p>
+						</div>
+				  </div>
+				<!-- </form> -->
+			</div>
+		</content>
+		<footer>
+			
+		</footer>
+	</div>
+<script>
+	function statusChangeCallback(response) {
+  console.log('statusChangeCallback');
+  if (response.status === 'connected') {
+    testAPI();
+  } else {
+    document.getElementById('status').innerHTML = 'Please log ' +
+      'into this app.';
+  }
+}
+
+function checkLoginState() {
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+}
+
+window.fbAsyncInit = function() {
+FB.init({
+  appId      : 1802550953395732,
+  cookie     : true,  // enable cookies to allow the server to access
+                      // the session
+  xfbml      : true,  // parse social plugins on this page
+  version    : 'v2.8' // use graph api version 2.8
+});
+
+FB.getLoginStatus(function(response) {
+  statusChangeCallback(response);
+});
+
+};
+
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+function testAPI() {
+  var userID;
+  console.log('Welcome!  Fetching your information.... ');
+
+  FB.api('/me',{fields: 'name, email'}, function(response) {
+    console.log('Successful login for: ' + JSON.stringify(response));
+    localStorage.setItem('responseFb', JSON.stringify(response))
+    var identity = JSON.parse(localStorage.getItem('responseFb'))
+   
+    axios.post('http://localhost:3000/api/users/signfb',{
+      email : identity.email,
+      name : identity.name
+    })
+    .then((result)=>{
+      localStorage.setItem('token', result.data.token)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  });
+}
+
+</script>
+	<script>
+		$(document).ready(function(){
+			$( "#left-sidebar-signin" ).hide();
+			$( "#left-sidebar-signup" ).hide();
+
+			$( "#signin" ).click(function() {
+			  $( "#left-sidebar-signin" ).show( "fast", function() {
+					  $( "#left-sidebar-signup" ).hide( "fast", function() {
+					});
+			  });
+			});
+
+			$( "#signup" ).click(function() {
+			  $( "#left-sidebar-signup" ).show( "fast", function() {
+					  $( "#left-sidebar-signin" ).hide( "fast", function() {
+					});
+			  });
+			});
+
+			$( "#home-signin" ).click(function() {
+			  $( "#left-sidebar-signin" ).hide( "fast",function(){
+			  });
+			});
+
+
+			$( "#home-signup" ).click(function() {
+			  $( "#left-sidebar-signup" ).hide( "fast",function(){
+			  });
+			});
+
+		});
+	</script>
+
+	<script>
+		var app = new Vue({
+		  el: '#app',
+		  data: {
+		    name : '',
+		    email : '',
+		    password : '',
+		    msgStatus:false,
+		    message : ''
+		  },
+		  methods:{
+		  	closeMessage : function(){
+		  		this.msgStatus = false
+		  	},
+		  	signup : function(){
+		  		var self = this
+		  		axios.post('http://localhost:3000/api/users/signup',{
+		  			name : self.name,
+		  			email : self.email,
+		  			password : self.password
+		  		})
+		  		.then(response=>{
+		  			var data = response.data
+		  			if(data.msg){
+		  				self.message = data.msg
+		  				self.msgStatus = true
+		  				self.name = ''
+		    			self.email = ''
+		    			self.password = ''
+		  			}
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	signin : function(){
+		  		var self = this
+		  		axios.post('http://localhost:3000/api/users/signin',{
+		  			email : self.email,
+		  			password : self.password
+		  		})
+		  		.then(response=>{
+		  			self.name = ''
+		    		self.email = ''
+		  			localStorage.setItem('token', response.data.token)
+		  			window.location.href="/open-todo.html"
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	},
+		  	validation : function(){
+		  		var self = this
+		  		axios.get('http://localhost:3000/api/users/validation',{
+		  			headers : {token : localStorage.getItem('token')}
+		  		})
+		  		.then(response=>{
+		  			console.log(response.data)
+		  			if(response.data.email){
+		  				window.location.href="/open-todo.html"
+		  			}
+		  		})
+		  		.catch(err=>{
+		  			console.log(err)
+		  		})
+		  	}
+		  },
+		  created : function(){
+		  	this.validation()
+		  }
+		})
+	</script>
+</body>
+</html>
